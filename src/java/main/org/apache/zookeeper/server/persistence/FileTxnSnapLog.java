@@ -166,21 +166,8 @@ public class FileTxnSnapLog {
     public long restore(DataTree dt, Map<Long, Integer> sessions,
             PlayBackListener listener) throws IOException {
         long deserializeResult = snapLog.deserialize(dt, sessions);
+        LOG.info("restore deseiralize result {}", deserializeResult);
         FileTxnLog txnLog = new FileTxnLog(dataDir);
-        if (-1L == deserializeResult) {
-            /* this means that we couldn't find any snapshot, so we need to
-             * initialize an empty database (reported in ZOOKEEPER-2325) */
-            if (txnLog.getLastLoggedZxid() != -1) {
-                throw new IOException(
-                        "No snapshot found, but there are log entries. " +
-                        "Something is broken!");
-            }
-            /* TODO: (br33d) we should either put a ConcurrentHashMap on restore()
-             *       or use Map on save() */
-            save(dt, (ConcurrentHashMap<Long, Integer>)sessions);
-            /* return a zxid of zero, since we the database is empty */
-            return 0;
-        }
         TxnIterator itr = txnLog.read(dt.lastProcessedZxid+1);
         long highestZxid = dt.lastProcessedZxid;
         TxnHeader hdr;
@@ -244,7 +231,7 @@ public class FileTxnSnapLog {
         FileTxnLog txnLog = new FileTxnLog(dataDir);
         return txnLog.read(zxid, fastForward);
     }
-    
+
     /**
      * process the transaction on the datatree
      * @param hdr the hdr of the transaction
@@ -340,7 +327,7 @@ public class FileTxnSnapLog {
         truncLog.close();
 
         // re-open the txnLog and snapLog
-        // I'd rather just close/reopen this object itself, however that 
+        // I'd rather just close/reopen this object itself, however that
         // would have a big impact outside ZKDatabase as there are other
         // objects holding a reference to this object.
         txnLog = new FileTxnLog(dataDir);

@@ -40,7 +40,7 @@ import org.apache.zookeeper.server.persistence.FileTxnSnapLog;
 import org.junit.Assert;
 import org.junit.Test;
 
-/** If snapshots are corrupted to the empty file or deleted, Zookeeper should 
+/** If snapshots are corrupted to the empty file or deleted, Zookeeper should
  *  not proceed to read its transactiong log files
  *  Test that zxid == -1 in the presence of emptied/deleted snapshots
  */
@@ -104,7 +104,7 @@ public class EmptiedSnapshotRecoveryTest extends ZKTestCase implements  Watcher 
             Assert.fail("Should have gotten exception for corrupted database");
         } catch (IOException e) {
             // expected behavior
-        } 
+        }
         zks.shutdown();
     }
 
