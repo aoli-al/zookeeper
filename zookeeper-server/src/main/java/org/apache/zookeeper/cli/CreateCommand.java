@@ -30,6 +30,7 @@ import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Stat;
+import org.apache.zookeeper.Transaction;
 import org.apache.zookeeper.server.EphemeralType;
 
 /**
@@ -120,10 +121,12 @@ public class CreateCommand extends CliCommand {
             acl = AclParser.parse(args[3]);
         }
         try {
-            String newPath = hasT
-                ? zk.create(path, data, acl, flags, new Stat(), ttl)
-                : zk.create(path, data, acl, flags);
-            err.println("Created " + newPath);
+            Transaction transaction = zk.transaction();
+            transaction.commit();
+            // String newPath = hasT
+            //     ? zk.create(path, data, acl, flags, new Stat(), ttl)
+            //     : zk.create(path, data, acl, flags);
+            // err.println("Created " + newPath);
         } catch (IllegalArgumentException ex) {
             throw new MalformedPathException(ex.getMessage());
         } catch (KeeperException.EphemeralOnLocalSessionException e) {

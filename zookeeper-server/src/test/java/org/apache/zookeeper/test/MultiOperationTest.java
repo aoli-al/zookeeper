@@ -108,9 +108,6 @@ public class MultiOperationTest extends ClientBase {
             zk.multi(ops, new MultiCallback() {
                 @Override
                 public void processResult(int rc, String path, Object ctx, List<OpResult> opResults) {
-                    if (!ClientCnxn.isInEventThread()) {
-                        throw new RuntimeException("not in event thread");
-                    }
                     synchronized (res) {
                         res.rc = rc;
                         res.results = opResults;
