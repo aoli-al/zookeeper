@@ -2020,15 +2020,14 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
      * check a path whether exceeded the quota.
      *
      * @param path
-     *            the path of the node, used for the quota prefix check
-     * @param lastData
-     *            the current node data, {@code null} for none
+     *            the path of the node
      * @param data
-     *            the data to be set, or {@code null} for none
+     *            the data of the path
      * @param type
      *            currently, create and setData need to check quota
      */
-    public void checkQuota(String path, byte[] lastData, byte[] data, int type) throws KeeperException.QuotaExceededException {
+
+    public void checkQuota(String path, byte[] data, int type) throws KeeperException.QuotaExceededException {
         if (!enforceQuota) {
             return;
         }
@@ -2044,6 +2043,11 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
                 checkQuota(lastPrefix, dataBytes, 1);
                 break;
             case OpCode.setData:
+                DataNode node = zkDatabase.getDataTree().getNode(path);
+                byte[] lastData;
+                synchronized (node) {
+                    lastData = node.getData();
+                }
                 checkQuota(lastPrefix, dataBytes - (lastData == null ? 0 : lastData.length), 0);
                 break;
              default:

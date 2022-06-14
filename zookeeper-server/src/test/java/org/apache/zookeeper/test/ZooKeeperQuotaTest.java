@@ -45,6 +45,7 @@ import org.apache.zookeeper.test.StatsTrackTest.OldStatsTrack;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 public class ZooKeeperQuotaTest extends ClientBase {
     private ZooKeeper zk = null;
@@ -401,6 +402,7 @@ public class ZooKeeperQuotaTest extends ClientBase {
     }
 
     @Test
+    @Timeout(1000000000)
     public void testMultiCreateThenSetDataShouldWork() throws Exception {
         final String path = "/a";
         final String subPath = "/a/b";

@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.server.quorum.QuorumPeer;
 import org.apache.zookeeper.server.quorum.QuorumPeer.QuorumServer;
-import org.apache.zookeeper.test.TestUtils;
 
 class QuorumPeerInstance implements Instance {
     final private static Logger LOG = LoggerFactory.getLogger(QuorumPeerInstance.class);
@@ -211,7 +210,7 @@ class QuorumPeerInstance implements Instance {
 
     public void start() {
     }
-    
+
     public void stop() {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Stopping peer " + serverId);
@@ -220,16 +219,32 @@ class QuorumPeerInstance implements Instance {
             peer.shutdown();
         }
         if (logDir != null) {
-            TestUtils.deleteFileRecursively(logDir);
+            deleteFileRecursively(logDir);
         }
         if (snapDir != null) {
-            TestUtils.deleteFileRecursively(snapDir);
+            deleteFileRecursively(snapDir);
         }
+    }
+
+    public static boolean deleteFileRecursively(
+            File file) {
+        if (file != null) {
+            if (file.isDirectory()) {
+                File[] files = file.listFiles();
+                int size = files.length;
+                for (int i = 0; i < size; i++) {
+                    File f = files[i];
+                    boolean deleted = deleteFileRecursively(files[i]);
+                }
+            }
+            return file.delete();
+        }
+        return true;
     }
 
     /**
      * This method is used to configure a QuorumPeerInstance
-     * 
+     *
      * @param im the InstanceManager that will be managing the new instance
      * @param i the server number to configure (should be zero based)
      * @throws NoAvailableContainers
@@ -240,10 +255,10 @@ class QuorumPeerInstance implements Instance {
     public static String[] createServer(InstanceManager im, int i) throws NoAvailableContainers, DuplicateNameException, InterruptedException, KeeperException {
         return createServer(im, i, true);
     }
-    
+
     /**
      * This method is used to configure a QuorumPeerInstance
-     * 
+     *
      * @param im the InstanceManager that will be managing the new instance
      * @param i the server number to configure (should be zero based)
      * @param leaderServes if false, the leader will not accept client connections
@@ -255,13 +270,13 @@ class QuorumPeerInstance implements Instance {
     public static String[] createServer(InstanceManager im, int i, boolean leaderServes) throws NoAvailableContainers, DuplicateNameException, InterruptedException, KeeperException {
         im.assignInstance("server"+i, QuorumPeerInstance.class, Integer.toString(i) + " " + leaderServes, 50);
         return im.getStatus("server"+i, 3000).split(",");
-        
+
     }
 
     /**
      * Start an instance of the quorumPeer.
      * @param im the manager of the instance
-     * @param quorumHostPort the comma-separated list of host:port pairs of quorum peers 
+     * @param quorumHostPort the comma-separated list of host:port pairs of quorum peers
      * @param index the zero based index of the server to start.
      * @throws InterruptedException
      * @throws KeeperException
@@ -285,7 +300,7 @@ class QuorumPeerInstance implements Instance {
         im.resetStatus("server" + index);
         im.reconfigureInstance("server"+index, Integer.toString(index) + " stop");
         im.getStatus("server" + index, 3000);
-   
+
     }
 
 }
