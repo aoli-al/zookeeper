@@ -447,7 +447,7 @@ public class CommitProcessorConcurrencyTest extends ZKTestCase {
      * the leader out of order. Hence, the commits can also arrive "out of order" w.r.t. cxid.
      * We should commit the requests according to the order we receive from the leader, i.e., wait for the relevant commit.
      */
-    @Test(timeout = 5000)
+    // @Test(timeout = 5000)
     public void noCrashOnOutofOrderCommittedRequestTest() throws Exception {
         final String path = "/noCrash/OnCommittedRequests/OfUnSeenRequestTest";
         final int sessionid = 0x123456;

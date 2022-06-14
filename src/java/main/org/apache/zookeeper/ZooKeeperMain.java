@@ -121,7 +121,7 @@ public class ZooKeeperMain {
         new ReconfigCommand().addToMap(commandMapCli);
         new GetConfigCommand().addToMap(commandMapCli);
         new RemoveWatchesCommand().addToMap(commandMapCli);
-        
+
         // add all to commandMap
         for (Entry<String, CliCommand> entry : commandMapCli.entrySet()) {
             commandMap.put(entry.getKey(), entry.getValue().getOptionStr());
@@ -266,7 +266,7 @@ public class ZooKeeperMain {
         return cmdList;
     }
 
-    protected String getPrompt() {       
+    protected String getPrompt() {
         return "[zk: " + host + "("+zk.getState()+")" + " " + commandCount + "] ";
     }
 
@@ -274,7 +274,7 @@ public class ZooKeeperMain {
         System.out.println("\n"+msg);
     }
 
-    protected void connectToZK(String newHost) throws InterruptedException, IOException {
+    protected void connectToZK2(String newHost) throws InterruptedException, IOException {
         if (zk != null && zk.getState().isAlive()) {
             zk.close();
         }
@@ -285,9 +285,21 @@ public class ZooKeeperMain {
             System.setProperty(ZKClientConfig.SECURE_CLIENT, "true");
             System.out.println("Secure connection is enabled");
         }
-        zk = new ZooKeeperAdmin(host, Integer.parseInt(cl.getOption("timeout")), new MyWatcher(), readOnly);
+        // zk = new ZooKeeperAdmin(host, Integer.parseInt(cl.getOption("timeout")), new MyWatcher(), readOnly);
+        zk = new ZooKeeperAdmin(host, Integer.parseInt(cl.getOption("timeout")), new MyWatcher(), 0x1L, readOnly);
     }
-    
+
+    protected void connectToZK(String newHost) throws InterruptedException, IOException {
+        host = newHost;
+        boolean readOnly = cl.getOption("readonly") != null;
+        if (cl.getOption("secure") != null) {
+            System.setProperty(ZKClientConfig.SECURE_CLIENT, "true");
+            System.out.println("Secure connection is enabled");
+        }
+        zk = new ZooKeeperAdmin(host, Integer.parseInt(cl.getOption("timeout")), new MyWatcher(), readOnly);
+        // zk = new ZooKeeperAdmin(host, Integer.parseInt(cl.getOption("timeout")), new MyWatcher(), 0x1L, readOnly);
+    }
+
     public static void main(String args[]) throws CliException, IOException, InterruptedException
     {
         ZooKeeperMain main = new ZooKeeperMain(args);
@@ -606,7 +618,7 @@ public class ZooKeeperMain {
             usage();
             throw new CommandNotFoundException("Command not found " + cmd);
         }
-        
+
         boolean watch = false;
         LOG.debug("Processing " + cmd);
 
@@ -638,18 +650,18 @@ public class ZooKeeperMain {
             }
         } else if (cmd.equals("connect")) {
             if (args.length >= 2) {
-                connectToZK(args[1]);
+                connectToZK2(args[1]);
             } else {
-                connectToZK(host);
+                connectToZK2(host);
             }
         }
-        
+
         // Below commands all need a live connection
         if (zk == null || !zk.getState().isAlive()) {
             System.out.println("Not connected");
             return false;
         }
-        
+
         // execute from commandMap
         CliCommand cliCmd = commandMapCli.get(cmd);
         if(cliCmd != null) {

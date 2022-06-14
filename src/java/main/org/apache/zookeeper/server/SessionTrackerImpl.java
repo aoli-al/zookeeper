@@ -239,7 +239,7 @@ public class SessionTrackerImpl extends ZooKeeperCriticalThread implements
     }
 
     public long createSession(int sessionTimeout) {
-        long sessionId = nextSessionId.getAndIncrement();
+        long sessionId = nextSessionId.get();
         addSession(sessionId, sessionTimeout);
         return sessionId;
     }
